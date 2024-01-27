@@ -1,7 +1,5 @@
 ﻿using Ardalis.GuardClauses;
 using Ardalis.ListStartupServices;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using CleanArchitecture.Core;
 using CleanArchitecture.Infrastructure;
 using CleanArchitecture.Infrastructure.Data;
@@ -10,8 +8,6 @@ using FastEndpoints.Swagger;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
 builder.Host.UseSerilog((_, config) => config.ReadFrom.Configuration(builder.Configuration));
 
@@ -40,12 +36,9 @@ builder.Services.Configure<ServiceConfig>(config =>
   config.Path = "/listservices";
 });
 
-
-builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
-{
-  containerBuilder.RegisterModule(new DefaultCoreModule());
-  containerBuilder.RegisterModule(new AutofacInfrastructureModule(builder.Environment.IsDevelopment()));
-});
+builder.Services
+  .AddCore()
+  .AddInfrastructure(builder.Environment.IsDevelopment());
 
 var app = builder.Build();
 
